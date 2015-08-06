@@ -12,3 +12,10 @@
 ### Data:
 #Direct link: https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
 #Description of data: http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+
+###First we need to download the .zip file and unzip it to be able to use its contents for this analysis
+download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip", "dataset.zip")
+unzip("dataset.zip")
+#There should now be a folder in the working directory called "UCI HAR Dataset" which contains all the files that were in the .zip file.
+
+###Now the datasets that we want to use need to be combined

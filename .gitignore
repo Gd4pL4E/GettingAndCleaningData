@@ -1,3 +1,10 @@
+#Rstudio stuff
 .Rproj.user
 .Rhistory
 .RData
+
+#Data files that you should be downloaded by the script
+UCI\ HAR\ Dataset
+dataset.zip
+
+
