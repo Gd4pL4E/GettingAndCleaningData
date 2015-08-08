@@ -25,31 +25,59 @@ download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUC
 unzip("dataset.zip")
 
 
-###First, we need to create the datasets (they are currently seperates each in 3 .txt files)
+###Step 1: create the datasets (they are currently seperates each in 3 .txt files) and combine to one big dataset
 #Make sure dplyr and tidyr are inistalled (and their dependencies)
 
 #Reading the files for test. 'activity' is saved as a vector to edit in the next step
-subjects <- read.table("UCI HAR Dataset/test/subject_test.txt")
+subjects <- read.table("UCI HAR Dataset/test/subject_test.txt")[,1]
 activity <- read.table("UCI HAR Dataset/test/y_test.txt")[,1]
 dataset <- read.table("UCI HAR Dataset/test/X_test.txt")
+
+#Making subjects a character string instead of an integer (the values aren't counts, just the ID of the subject)
+#And making it a data.frame
+subjects <- as.character(subjects)
+subjects <- as.data.frame(subjects)
+
 
 #Transforming activities to factors instead of integers, with the correct names (= levels)
 activity <- as.factor(activity)
 levels(activity) <- c("WALKING", "WALKING_UPSTAIRS", "WALKING_DOWNSTAIRS", "SITTING", "STANDING", "LAYING")
 activity <- as.data.frame(activity)
 
-#Coming the three data frames into one
+#Adding the column names to the dataset (X_test.txt)
+labels <- as.character(read.table("UCI HAR Dataset/features.txt")[,2])
+colnames(dataset) <- labels
+
+#Combining the three data frames into one
 library(dplyr)
 test.df <- bind_cols(subjects, activity, dataset)
 
 #Doing the last 3 staps for the train files
-subjects <- read.table("UCI HAR Dataset/train/subject_train.txt")
+subjects <- read.table("UCI HAR Dataset/train/subject_train.txt")[,1]
 activity <- read.table("UCI HAR Dataset/train/y_train.txt")[,1]
 dataset <- read.table("UCI HAR Dataset/train/X_train.txt")
+
+subjects <- as.character(subjects)
+subjects <- as.data.frame(subjects)
 
 activity <- as.factor(activity)
 levels(activity) <- c("WALKING", "WALKING_UPSTAIRS", "WALKING_DOWNSTAIRS", "SITTING", "STANDING", "LAYING")
 activity <- as.data.frame(activity)
 
+#We skip setting 'labels' again, because the labels are the same for 'test' and 'train'
+colnames(dataset) <- labels
+
 library(dplyr)
 train.df <- bind_cols(subjects, activity, dataset)
+
+#To make thinks faster, we start using data.table instead of data.frame
+#For more information see ?data.table after downloading the package
+library(data.table)
+test.dt <- data.table(test.df)
+train.dt <- data.table(train.df)
+
+#Now we can combine these two datasets
+complete.data <- bind_rows(test.dt, train.dt)
+complete.data$subjects <- as.factor(complete.data$subjects)
+
+###Step 2: Extract only the mean and sd values from the dataset
