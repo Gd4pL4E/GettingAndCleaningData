@@ -34,7 +34,7 @@ dataset <- read.table("UCI HAR Dataset/test/X_test.txt")
 
 #Making subjects a character string instead of an integer (the values aren't counts, just the ID of the subject)
 #And making it a data.frame
-subjects <- as.character(subjects)
+subjects <- as.numeric(subjects)
 subjects <- as.data.frame(subjects, stringsAsFactors = FALSE)
 
 #Transforming activities to factors instead of integers, with the correct names (= levels)
@@ -55,7 +55,7 @@ subjects <- read.table("UCI HAR Dataset/train/subject_train.txt")[,1]
 activity <- read.table("UCI HAR Dataset/train/y_train.txt")[,1]
 dataset <- read.table("UCI HAR Dataset/train/X_train.txt")
 
-subjects <- as.character(subjects)
+subjects <- as.numeric(subjects)
 subjects <- as.data.frame(subjects, stringsAsFactors = FALSE)
 
 activity <- as.factor(activity)
@@ -69,7 +69,7 @@ library(dplyr)
 train.df <- bind_cols(subjects, activity, dataset)
 
 #To make thinks faster, we start using data.table instead of data.frame
-#For more information see ?data.table after downloading the package
+#For more information see ?data.table after (down)loading the package
 library(data.table)
 test.dt <- data.table(test.df)
 train.dt <- data.table(train.df)
@@ -77,9 +77,9 @@ train.dt <- data.table(train.df)
 #Before we combine these two tables, we need a variable, called "type", so we know which observations
 #are from 'test' and which are from 'train', we also change the position of this variable so it comes
 #before the numerical data
-test.dt <- mutate(test.dt, type = "test") 
+test.dt <- mutate(test.dt, type = "TEST") 
 test.dt <- select(test.dt, subjects, activity, type, everything())
-train.dt <- mutate(train.dt, type = "train")
+train.dt <- mutate(train.dt, type = "TRAIN")
 train.dt <- select(train.dt, subjects, activity, type, everything())
 
 #Now we can combine these two datasets, and make sure 'subjects' and 'type' are factors
@@ -106,4 +106,18 @@ selected.data <- select(complete.data, subjects:type, contains("-mean()"), conta
 #Note that this is done already. First 3 column names (subject, activity, type) were named
 #The numerical data has been labeled at step 2. And the activities have been labeled appropriately
 
-###"Step 5":
+###"Step 5": Create a tidy data set with only the means for each numerical variable, by subjects and activity
+#First we group the factors, because we don't want these to be sumarised, i.e. taken the mean of
+selected.data.means <- group_by(selected.data, subjects)
+selected.data.means <- group_by(selected.data.means, activity, add = TRUE)
+selected.data.means <- group_by(selected.data.means, type, add = TRUE)
+#Then we summarize the data by only showing the means for the numerical values
+tidy.data <- summarise_each(selected.data.means, funs(mean))
+
+#Now we sort the data to make it look nice, we first ungroup the dataset, so arrange will work without interference
+tidy.data2 <- ungroup(tidy.data)
+tidy_data <- arrange(tidy.data2, type, subjects, activity)
+
+#And finally, we write the table to a .txt file
+write.table(tidy_data, "tidy_data.txt", row.name = FALSE)
+write.csv(tidy_data, "tidy_data.csv")
