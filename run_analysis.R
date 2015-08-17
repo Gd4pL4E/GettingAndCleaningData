@@ -88,7 +88,7 @@ complete.data$subjects <- as.factor(complete.data$subjects)
 complete.data$type <- as.factor(complete.data$type)
 
 #And now we can also add the column names for the numerical data
-#Note that the labels need to be makde unique, because dplyr doesn't know what to do with duplicate
+#Note that the labels need to be made unique, because dplyr doesn't know what to do with duplicate
 #column names
 labels <- as.character(read.table("UCI HAR Dataset/features.txt")[,2])
 labels <- make.unique(labels)

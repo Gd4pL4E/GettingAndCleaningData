@@ -40,14 +40,14 @@ For more information about this dataset contact: activityrecognition@smartlab.ws
 
 ###2: Variables and units of the tidy dataset
 
-The variables are the same as for the original dataset, except for a few key differences:
+The variables are the same as for the original dataset (so you can find the information in README.txt, features.txt and features_info.txt in the original dataset), except for a few key differences:
 
 - Only the means and the standard deviations of the features have been selected.
 - The values of each replication are averaged, so there is only one value for every combination of subject and activity. In other words, all the values for subject '2' for activity 'WALKING' have been taken the mean of and only this mean is shown in the file tidy_data.txt.
 
 Units are unchanged and are still the same as in the original dataset.
 
-The factors have undergone some minor changed:
+The factors have undergone some minor changes:
 - Values for the variable 'activity' were integers in original dataset, here they are named (e.g. "1" is now "WALKING"). Names were taken from 'activity_labels.txt' from the original dataset.
 - Because we combined the data for the 'test' and 'train' subjects, a new variable called 'type' was created. Subjects who were part of the test group are labeled "TEST" under this variable and subjects from the train group are labeled "TRAIN".
 
@@ -55,4 +55,38 @@ Information about how and why this dataset was created can be found in the next 
 
 ###3: Analysis done by the scipt, the made choices and motivation for it
 
-...
+In this section, the script will be discussed globally. The script itself has many comments to explain what is done. For the codebook, the focus will mostly be on the significant decisions that were made and why (i.e. not every line of the code will be discussed). Parts of run_analysis.R will be quoted using backticks, so it is easy to find the line which is referred to in this section.
+
+`#Transforming activities to factors instead of integers, with the correct names (= levels)`
+`#Note that this is "Step 3"`
+
+When working on the script I neglected the seperate steps and tried to get from starting to end point, because of this some steps are not in order. The advantage of making the factors look like they should before hand, is that the seperate data sets can also be used for statistics without having to make a new script.
+
+`#To make thinks faster, we start using data.table instead of data.frame`
+
+From the documentation: "data.table inherits from data.frame. It offers fast subset, fast grouping, fast update, fast ordered joins and list columns in a short and flexible syntax, for faster development. It is inspired by A[B] syntax in R where A is a matrix and B is a 2-column matrix. Since a data.table is a data.frame, it is compatible with R functions and packages that only accept data.frame."
+
+`#Before we combine these two tables, we need a variable, called "type", so we know which observations`
+
+The word 'type' was chosen for its ease in the script (only 4 characters) and being clear enough. The meaning should be clear from both the script, and the explenation in section 2 of this codebook.
+
+`###"Step 2": Extract only the mean and sd values from the dataset`
+`#We use dplyr's select function to get the factorial data ('subjects', 'activity' and 'type')`
+`#and the mean and sd of the numerical data. We do this by looking for the string "-mean()" and "-std()"`
+
+The assignment asks for both the standard deviation and the mean. However, in the dataset there are two kinds of means. The first 'mean' is one of the estimate variables of all the features. The other 'mean' directs to additional vectors made based on the angle variables.
+
+To me it made most sense for this dataset to be used for statistical analysis and possible plotting by using the mean and sd variables (meaning you can do statistical comparisons with this). Since the other 'mean' variables are a different kind of data (based on the other vectors), I chose not to include these variables in the final dataset.
+
+For the same reason "~meanFreq()" was not included.
+
+`###"Step 4": Appropriately label the data set with descriptive variable names`
+`#Note that this is done already. First 3 column names (subject, activity, type) were named`
+`#The numerical data has been labeled at step 2. And the activities have been labeled appropriately`
+
+The first 3 columns should be clear already from the script, or otherwise from section two from this codebook. However, the column names for the following columns are a bit more complicated. I made the choice not to change these variable names to not cause confusion when reading the original data files and when reading the README.xt, features.txt and features_info.txt of the original dataset. 
+It would be possible to remove the brackets "()" and write Acc and Gyro in full, but readability is only slightly improved while losing compatibility with the original dataset.
+
+`###"Step 5": Create a tidy data set with only the means for each numerical variable, by subjects and activity`
+
+One note about the last step. I chose to order the dataset first by type (i.e. if the subject is part of the test group or not), and *then* by subject. Since these are the main groups you will likely compare with each other (i.e. if you would do a t-test), it is visually possible to get some idea. I still kept it as the last factor of the three, because if you look for a specific case you would more likely look for the subject and the activity first.
