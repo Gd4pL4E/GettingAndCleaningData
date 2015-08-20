@@ -120,4 +120,3 @@ tidy_data <- arrange(tidy.data2, type, subjects, activity)
 
 #And finally, we write the table to a .txt file
 write.table(tidy_data, "tidy_data.txt", row.name = FALSE)
-write.csv(tidy_data, "tidy_data.csv")
